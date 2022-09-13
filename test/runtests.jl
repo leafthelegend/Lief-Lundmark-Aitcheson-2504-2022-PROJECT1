@@ -24,8 +24,8 @@ test_ext_euclid_ints()
 # Execute unit tests for polynomials
 ####
 include("polynomials_test.jl")
-# prod_test_poly(polyType)
-# prod_derivative_test_poly(polyType)
+prod_test_poly(polyType)
+prod_derivative_test_poly(polyType)
 ext_euclid_test_poly(polyType)
 division_test_poly(polyType)
 
