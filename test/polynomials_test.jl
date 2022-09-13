@@ -10,19 +10,23 @@
 """
 Test product of polynomials.
 """
-function prod_test_poly(;N::Int = 10^3, N_prods::Int = 20, seed::Int = 0)
+function prod_test_poly(T::Type{<:Polynomial};N::Int = 10^3, N_prods::Int = 20, seed::Int = 0)
     Random.seed!(seed)
     for _ in 1:N
-        p1 = rand(Polynomial)
-        p2 = rand(Polynomial)
+        p1 = rand(T)
+        p2 = rand(T)
         prod = p1*p2
         @assert leading(prod) == leading(p1)*leading(p2)
     end
 
     for _ in 1:N
-        p_base = Polynomial(Term(1,0))
+        if length(T.parameters)>0
+            p_base = T(Term{T.parameters[1]}(1,0))
+        else
+            p_base = T(Term(1,0))
+        end
         for _ in 1:N_prods
-            p = rand(Polynomial)
+            p = rand(T)
             prod = p_base*p
             @assert leading(prod) == leading(p_base)*leading(p)
             p_base = prod
@@ -34,11 +38,11 @@ end
 """
 Test derivative of polynomials (as well as product).
 """
-function prod_derivative_test_poly(;N::Int = 10^2,  seed::Int = 0)
+function prod_derivative_test_poly(T::Type{<:Polynomial};N::Int = 10^2,  seed::Int = 0)
     Random.seed!(seed)
     for _ in 1:N
-        p1 = rand(Polynomial)
-        p2 = rand(Polynomial)
+        p1 = rand(T)
+        p2 = rand(T)
         p1d = derivative(p1)
         p2d = derivative(p2)
         @assert (p1d*p2) + (p1*p2d) == derivative(p1*p2)
@@ -50,13 +54,13 @@ end
 """
 Test division of polynomials modulo p.
 """
-function division_test_poly(;prime::Int = 101, N::Int = 10^4, seed::Int = 0)
+function division_test_poly(T::Type{<:Polynomial};prime::Int = 101, N::Int = 10^4, seed::Int = 0)
     Random.seed!(seed)
     for _ in 1:N
-        p1 = rand(Polynomial)
-        p2 = rand(Polynomial)
+        p1 = rand(T)
+        p2 = rand(T)
         p_prod = p1*p2
-        q, r = Polynomial(), Polynomial()
+        q, r = T(), T()
         try
             q, r = divide(p_prod, p2)(prime)
             if (q, r) == (nothing,nothing)
@@ -78,11 +82,11 @@ end
 """
 Test the extended euclid algorithm for polynomials modulo p.
 """
-function ext_euclid_test_poly(;prime::Int=101, N::Int = 10^3, seed::Int = 0)
+function ext_euclid_test_poly(T::Type{<:Polynomial};prime::Int=101, N::Int = 10^3, seed::Int = 0)
     Random.seed!(seed)
     for _ in 1:N
-        p1 = rand(Polynomial)
-        p2 = rand(Polynomial)
+        p1 = rand(T)
+        p2 = rand(T)
         g, s, t = extended_euclid_alg(p1, p2, prime)
         @assert mod(s*p1 + t*p2 - g, prime) == 0
     end

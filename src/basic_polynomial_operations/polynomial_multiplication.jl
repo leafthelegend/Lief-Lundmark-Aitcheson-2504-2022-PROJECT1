@@ -10,7 +10,7 @@
 Multiply two polynomials.
 """
 function *(p1::Polynomial, p2::Polynomial)::Polynomial
-    p_out = Polynomial()
+    p_out = typeof(p1)()
     for t in p1
         new_summand = (t * p2)
         p_out = p_out + new_summand

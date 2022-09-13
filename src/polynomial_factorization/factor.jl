@@ -44,7 +44,7 @@ function factor(f::Polynomial, prime::Int)::Vector{Tuple{Polynomial,Int}}
     end
 
     #Append the leading coefficient as well
-    push!(ret_val, (leading(f_modp).coeff* one(Polynomial), 1) )
+    push!(ret_val, (leading(f_modp).coeff* one(f), 1) )
 
     return ret_val
 end
@@ -72,9 +72,9 @@ Distinct degree factorization.
 Given a square free polynomial `f` returns a list, `g` such that `g[k]` is a product of irreducible polynomials of degree `k` for `k` in 1,...,degree(f) ÷ 2, such that the product of the list (mod `prime`) is equal to `f` (mod `prime`).
 """
 function dd_factor(f::Polynomial, prime::Int)::Array{Polynomial}
-    x = x_poly()
+    x = x_poly(typeof(f))
     w = deepcopy(x)
-    g = Array{Polynomial}(undef,degree(f)) #Array of polynomials indexed by degree
+    g = Array{typeof(f)}(undef,degree(f)) #Array of polynomials indexed by degree
 
     #Looping over degrees
     for k in 1:degree(f)
@@ -85,7 +85,7 @@ function dd_factor(f::Polynomial, prime::Int)::Array{Polynomial}
 
 
     #edge case for final factor
-    f != one(Polynomial) && push!(g,f)
+    f != one(f) && push!(g,f)
     
     return g
 end
@@ -99,10 +99,10 @@ function dd_split(f::Polynomial, d::Int, prime::Int)::Vector{Polynomial}
     f = mod(f,prime)
     degree(f) == d && return [f]
     degree(f) == 0 && return []
-    w = rand(Polynomial, degree = d, monic = true)
+    w = rand(typeof(f), degree = d, monic = true)
     w = mod(w,prime)
     n_power = (prime^d-1) ÷ 2
-    g = gcd(pow_mod(w,n_power,prime) - one(Polynomial), f, prime)
+    g = gcd(pow_mod(w,n_power,prime) - one(f), f, prime)
     ḡ = (f ÷ g)(prime) # g\bar + [TAB]
     return vcat(dd_split(g, d, prime), dd_split(ḡ, d, prime) )
 end

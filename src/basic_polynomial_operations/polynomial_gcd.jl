@@ -7,12 +7,12 @@
 #############################################################################
 
 """
-The extended euclid algorithm for polynomials modulo prime.
+The extended euclid algorithm for polynomials modulo prime. s and t will take the type of a. g may take the type of either a or b.
 """
 function extended_euclid_alg(a::Polynomial, b::Polynomial, prime::Int)
     old_r, r = mod(a, prime), mod(b, prime)
-    old_s, s = one(Polynomial), zero(Polynomial)
-    old_t, t = zero(Polynomial), one(Polynomial)
+    old_s, s = one(a), zero(a)
+    old_t, t = zero(a), one(a)
 
     while !iszero(mod(r,prime))
         q = first(divide(old_r, r)(prime))

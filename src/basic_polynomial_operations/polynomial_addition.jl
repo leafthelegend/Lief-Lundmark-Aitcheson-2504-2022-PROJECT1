@@ -7,9 +7,9 @@
 #############################################################################
 
 """
-Add a polynomial and a term.
+Add a dense polynomial and a term.
 """
-function +(p::Polynomial, t::Term)
+function +(p::PolynomialDense, t::Term)
     p = deepcopy(p)
     if t.degree > degree(p)
         push!(p, t)
@@ -23,6 +23,27 @@ function +(p::Polynomial, t::Term)
 
     return trim!(p)
 end
+
+"""
+Add a sparse polynomial and a term.
+"""
+function +(p::PolynomialSparse, t::Term)
+    p = deepcopy(p)
+    if isempty(p.terms)
+        push!(p.terms,t)
+        return p
+    end
+    i = findfirst(term -> term.degree <= t.degree, p.terms)
+    if isnothing(i)
+        push!(p.terms,t)
+    elseif t.degree == p.terms[i].degree
+        p.terms[i] += t
+    else
+        insert!(p.terms,i,t)
+    end
+    return trim!(p)
+end
+
 +(t::Term, p::Polynomial) = p + t
 
 """
@@ -41,3 +62,10 @@ Add a polynomial and an integer.
 """
 +(p::Polynomial, n::Int) = p + Term(n,0)
 +(n::Int, p::Polynomial) = p + Term(n,0)
+-(p::Polynomial, n::Int) = p + Term(-n,0)
+-(n::Int, p::Polynomial) = -p + Term(n,0)
+
++(p::PolynomialSparse{T}, n::T) where {T<:Integer} = p + Term{T}(n,0)
++(n::T, p::PolynomialSparse{T}) where {T<:Integer} = p + Term{T}(n,0)
+-(p::PolynomialSparse{T}, n::T) where {T<:Integer} = p + Term{T}(-n,0)
+-(n::T, p::PolynomialSparse{T}) where {T<:Integer} = -p + Term{T}(n,0)

@@ -5,6 +5,8 @@
 #                                                                               
 #############################################################################
 #############################################################################
+import Pkg; Pkg.add("Distributions")
+
 
 using Distributions, StatsBase, Random
 
@@ -15,6 +17,8 @@ import Base: +, -, *, mod, %, ÷, ==, ^, rand, rem, zero, one
 include("src/general_alg.jl")
 include("src/term.jl")
 include("src/polynomial.jl")
+include("src/polynomialDense.jl")
+include("src/polynomialSparse.jl")
     include("src/basic_polynomial_operations/polynomial_addition.jl")
     include("src/basic_polynomial_operations/polynomial_multiplication.jl")
     include("src/basic_polynomial_operations/polynomial_division.jl")
