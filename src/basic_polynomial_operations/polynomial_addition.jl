@@ -7,10 +7,9 @@
 #############################################################################
 
 """
-Add a dense polynomial and a term.
+Add a dense polynomial and a term (in place).
 """
-function +(p::PolynomialDense, t::Term)
-    p = deepcopy(p)
+function add!(p::PolynomialDense, t::Term)
     if t.degree > degree(p)
         push!(p, t)
     else
@@ -25,10 +24,16 @@ function +(p::PolynomialDense, t::Term)
 end
 
 """
-Add a sparse polynomial and a term.
+Add a dense polynomial and a term (not in place).
 """
-function +(p::PolynomialSparse, t::Term)
-    p = deepcopy(p)
++(p::PolynomialDense, t::Term) = add!(copyTerms(p), t)
+
+
+
+"""
+Add a sparse polynomial and a term (in place).
+"""
+function add!(p::PolynomialSparse, t::Term)
     if isempty(p.terms)
         push!(p.terms,t)
         return p
@@ -38,34 +43,65 @@ function +(p::PolynomialSparse, t::Term)
         push!(p.terms,t)
     elseif t.degree == p.terms[i].degree
         p.terms[i] += t
+        if iszero(p.terms[i])
+            deleteat!(p.terms,i)
+        end
     else
         insert!(p.terms,i,t)
-    end
-    return trim!(p)
-end
-
-+(t::Term, p::Polynomial) = p + t
-
-"""
-Add two polynomials.
-"""
-function +(p1::Polynomial, p2::Polynomial)::Polynomial
-    p = deepcopy(p1)
-    for t in p2
-        p += t
     end
     return p
 end
 
 """
+Add a sparse polynomial and a term (not in place).
+"""
++(p::PolynomialSparse, t::Term) = add!(copyTerms(p), t)
+
++(t::Term, p::Polynomial) = p + t
+
+"""
+Add two polynomials (in place).
+"""
+function add!(p1::Polynomial, p2::Polynomial)::Polynomial
+    t1, t2 = length(p1),length(p2) #initialise pointers to the terms of p1 and p2
+    while t2 > 0
+        if t1 == 0
+            prepend!(p1.terms, p2.terms[1:t2])
+            break
+        end
+        if p1.terms[t1].degree > p2.terms[t2].degree
+            insert!(p1.terms,t1+1,p2.terms[t2])
+            t2 -= 1
+        elseif p1.terms[t1].degree < p2.terms[t2].degree
+            t1 -= 1
+        else
+            p1.terms[t1] += p2.terms[t2]
+            if iszero(p1.terms[t1])
+                deleteat!(p1.terms,t1)
+            end
+            t1 -= 1
+            t2 -= 1
+        end
+    end
+    return p1
+end
+
+"""
+Add two polynomials (not in place).
+"""
++(p1::Polynomial, p2::Polynomial) = add!(copyTerms(p1), p2)
+
+"""
 Add a polynomial and an integer.
 """
-+(p::Polynomial, n::Int) = p + Term(n,0)
-+(n::Int, p::Polynomial) = p + Term(n,0)
--(p::Polynomial, n::Int) = p + Term(-n,0)
--(n::Int, p::Polynomial) = -p + Term(n,0)
++(p::PolynomialDense, n::Int) = p + Term(n,0)
++(n::Int, p::PolynomialDense) = p + Term(n,0)
+-(p::PolynomialDense, n::Int) = p + Term(-n,0)
+-(n::Int, p::PolynomialDense) = -p + Term(n,0)
 
-+(p::PolynomialSparse{T}, n::T) where {T<:Integer} = p + Term{T}(n,0)
-+(n::T, p::PolynomialSparse{T}) where {T<:Integer} = p + Term{T}(n,0)
--(p::PolynomialSparse{T}, n::T) where {T<:Integer} = p + Term{T}(-n,0)
--(n::T, p::PolynomialSparse{T}) where {T<:Integer} = -p + Term{T}(n,0)
+#ensure integer is converted to correct type for addition with PolynomialSparse
+
++(p::PolynomialSparse{T}, n::Integer) where {T<:Integer} = p + Term{T}(n,0)
++(n::Integer, p::PolynomialSparse{T}) where {T<:Integer} = p + Term{T}(n,0)
+-(p::PolynomialSparse{T}, n::Integer) where {T<:Integer} = p + Term{T}(-n,0)
+-(n::Integer, p::PolynomialSparse{T}) where {T<:Integer} = -p + Term{T}(n,0)

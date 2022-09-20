@@ -47,7 +47,7 @@ Show a term.
 function show(io::IO, t::Term, cdot::Bool = false)
     iszero(t.coeff) && return(print(io,"0"))
     iszero(t.degree) && return(print(io,t.coeff))
-    print(io,t.coeff == 1 ? "" : "$(t.coeff)$(cdot ? "⋅" : "")",(t.degree > 1 ? "x^$(t.degree)" : "x"))
+    print(io,abs(t.coeff) == 1 ? (t.coeff==1 ? "" : "-") : "$(t.coeff)$(cdot ? "⋅" : "")",(t.degree > 1 ? "x^$(t.degree)" : "x"))
 end
 
 ########################
@@ -104,8 +104,12 @@ Multiply two terms.
 
 
 """
-Compute the symmetric mod of a term with an integer.
+Compute the mod of a term with an integer.
 """
+smod(a::Integer,b::Integer) = mod(a,b) > b÷2 ? mod(a,b) - b : mod(a,b)
+
+smod(t::Term, p::Integer) = Term(smod(t.coeff,p), t.degree)
+
 mod(t::Term, p::Integer) = Term(mod(t.coeff,p), t.degree)
 
 """

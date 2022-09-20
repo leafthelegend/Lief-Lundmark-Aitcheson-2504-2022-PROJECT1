@@ -10,7 +10,7 @@
 """
 Test product of polynomials.
 """
-function prod_test_poly(T::Type{<:Polynomial};N::Int = 10^3, N_prods::Int = 20, seed::Int = 0)
+function prod_test_poly(T::Type{<:Polynomial};N::Int = 10^3, N_prods::Int = 20, seed::Int = 0, verbose::Bool = true)
     Random.seed!(seed)
     for _ in 1:N
         p1 = rand(T)
@@ -32,7 +32,8 @@ function prod_test_poly(T::Type{<:Polynomial};N::Int = 10^3, N_prods::Int = 20, 
             p_base = prod
         end
     end
-    println("prod_test_poly - PASSED")
+    verbose && println("prod_test_poly - PASSED")
+    nothing
 end
 
 """

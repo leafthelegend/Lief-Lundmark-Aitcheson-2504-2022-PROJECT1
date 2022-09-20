@@ -8,14 +8,16 @@ struct PolynomialSparse{T<:Integer} <: Polynomial
     PolynomialSparse() = new{Int}([])
 
     #Inner constructor of polynomial based on arbitrary list of terms
-    function PolynomialSparse{T}(vt::Vector{Term{T}}) where {T<:Integer}
+    function PolynomialSparse{T}(vt::Vector{Term{T}};sorting=true) where {T<:Integer}
 
         #Remove zero terms
         vt = filter((t)->!iszero(t), vt)
 
         #sort the terms in descending order of degree
-        terms = sort(vt,by=t->t.degree,rev=true)
-        return new{T}(terms)
+        if sorting
+            vt = sort(vt,by=t->t.degree,rev=true)
+        end
+        return new{T}(vt)
     end
 end
 
@@ -44,7 +46,7 @@ while true
 _degree = degree == -1 ? rand(Poisson(mean_degree)) : degree
 _terms = terms == -1 ? rand(Binomial(_degree,prob_term)) : terms
 degrees = vcat(sort(sample(0:_degree-1,_terms,replace = false)),_degree)
-coeffs = rand(1:max_coeff,_terms+1)
+coeffs = rand(-max_coeff:max_coeff,_terms+1)
 monic && (coeffs[end] = 1)
 p = polyType( [Term{T}(coeffs[i],degrees[i]) for i in 1:length(degrees)] )
 condition(p) && return p

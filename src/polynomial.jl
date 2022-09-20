@@ -102,6 +102,13 @@ evaluate(f::Polynomial, x::T) where T <: Number = sum(evaluate(t,x) for t in f)
 #################################################################
 
 """
+Copy a polynomial
+"""
+
+copyTerms(p::Polynomial) = typeof(p)(p.terms,sorting=false)
+
+
+"""
 The negative of a polynomial.
 """
 -(p::Polynomial) = typeof(p)(map((pt)->-pt, p.terms))
@@ -178,31 +185,27 @@ Warning this may not make sense if n does not divide all the coefficients of p.
 """
 Take the mod of a polynomial with an integer.
 """
-function mod(f::Polynomial, p::Integer)::Polynomial
-    f_out = deepcopy(f)
+function mod!(f::Polynomial, p::Integer)::Polynomial
+    for i in 1:length(f.terms)
+        f.terms[i] = mod(f.terms[i], p)
+    end
+    return trim!(f)
+end
+
+mod(f::Polynomial, p::Integer) = mod!(copyTerms(f),p)
+
+function smod(f::Polynomial, p::Integer)::Polynomial
+    f_out = copyTerms(f)
     for i in 1:length(f_out.terms)
-        f_out.terms[i] = mod(f_out.terms[i], p)
+        f_out.terms[i] = smod(f_out.terms[i], p)
     end
     return trim!(f_out)
-        
-    # p_out = Polynomial()
-    # for t in f
-    #     new_term = mod(t, p)
-    #     @show new_term
-    #     push!(p_out, new_term)
-    # end
-    # return p_out
 end
 
 """
 Power of a polynomial mod prime.
 """
 function pow_mod(p::Polynomial, n::Integer, prime::Integer)
-    n < 0 && error("No negative power")
-    out = one(p)
-    for _ in 1:n
-        out *= p
-        out = mod(out, prime)
-    end
-    return out
+    out = PolynomialModP(p,prime)
+    return (out^n).polynomial
 end

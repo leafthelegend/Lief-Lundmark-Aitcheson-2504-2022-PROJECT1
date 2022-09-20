@@ -26,7 +26,7 @@ struct PolynomialDense <: Polynomial
     PolynomialDense() = new([zero(Term)])
 
     #Inner constructor of polynomial based on arbitrary list of terms
-    function PolynomialDense(vt::Vector{Term})
+    function PolynomialDense(vt::Vector{Term};sorting=true)
 
         #Filter the vector so that there is not more than a single zero term
         vt = filter((t)->!iszero(t), vt)
