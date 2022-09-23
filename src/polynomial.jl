@@ -105,7 +105,7 @@ evaluate(f::Polynomial, x::T) where T <: Number = sum(evaluate(t,x) for t in f)
 Copy a polynomial
 """
 
-copyTerms(p::Polynomial) = typeof(p)(p.terms,sorting=false)
+copyTerms(p::Polynomial) = typeof(p)(copy(p.terms),sorting=false,filtering=false)
 
 
 """
@@ -130,7 +130,17 @@ end
 """
 The prim part (multiply a polynomial by the inverse of its content).
 """
+# function prim_part(p::Polynomial)
+#     c = content(p)
+#     d = last(p.terms).degree 
+#     reduced = copyTerms(p)
+#     map!(t->typeof(t)(t.coeff, t.degree-d),reduced.terms,reduced.terms)
+#     reduced = reduced ÷ c
+#     return reduced
+# end
+
 prim_part(p::Polynomial) = p ÷ content(p)
+
 
 """
 A square free polynomial.
@@ -166,8 +176,19 @@ Subtraction of two polynomials.
 """
 Multiplication of polynomial and term.
 """
-*(t::Term, p1::Polynomial)::Polynomial = iszero(t) ? typeof(p1)() : typeof(p1)(map((pt)->t*pt, p1.terms))
-*(p1::Polynomial, t::Term)::Polynomial = t*p1
+function mult!(p::Polynomial,t::Term)::Polynomial
+    if iszero(t)
+        empty!(p.terms)
+    else
+        for i in 1:length(p)
+            p.terms[i] *= t
+        end
+    end
+    return p
+end
+
+*(p::Polynomial,t::Term) = mult!(copyTerms(p),t)
+*(t::Term,p::Polynomial) = p*t
 
 """
 Multiplication of polynomial and an integer.

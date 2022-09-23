@@ -8,10 +8,12 @@ struct PolynomialSparse{T<:Integer} <: Polynomial
     PolynomialSparse() = new{Int}([])
 
     #Inner constructor of polynomial based on arbitrary list of terms
-    function PolynomialSparse{T}(vt::Vector{Term{T}};sorting=true) where {T<:Integer}
+    function PolynomialSparse{T}(vt::Vector{Term{T}};sorting=true,filtering=true) where {T<:Integer}
 
         #Remove zero terms
-        vt = filter((t)->!iszero(t), vt)
+        if filtering
+            vt = filter((t)->!iszero(t), vt)
+        end
 
         #sort the terms in descending order of degree
         if sorting
@@ -22,6 +24,9 @@ struct PolynomialSparse{T<:Integer} <: Polynomial
 end
 
 PolynomialSparse(vt::Vector{Term{T}}) where {T<:Integer} = PolynomialSparse{T}(vt)
+
+#alias
+const PolynomialSparseBI = PolynomialSparse{BigInt}
 
 #implement parametric methods to handle the case where a coefficient type is supplied
 

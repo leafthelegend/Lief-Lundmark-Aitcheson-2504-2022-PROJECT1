@@ -2,3 +2,4 @@ test/runAllPolyTests.jl
 src/polynomial_parametric.jl
 *.mem
 src/basic_polynomial_operations/crt_multiplication.jl
+*.toml

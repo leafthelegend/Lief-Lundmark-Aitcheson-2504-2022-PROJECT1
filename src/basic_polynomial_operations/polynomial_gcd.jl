@@ -13,7 +13,6 @@ function extended_euclid_alg(a::Polynomial, b::Polynomial, prime::Integer)
     old_r, r = mod(a, prime), mod(b, prime)
     old_s, s = one(a), zero(a)
     old_t, t = zero(a), one(a)
-
     while !iszero(mod(r,prime))
         q = first(divide(old_r, r)(prime))
         old_r, r = r, mod(old_r - q*r, prime)

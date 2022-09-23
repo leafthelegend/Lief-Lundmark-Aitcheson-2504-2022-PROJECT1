@@ -23,18 +23,17 @@ bigPoly(p::PolynomialModP)::PolynomialModP = PolynomialModP(bigPoly(p.polynomial
 using Primes
 
 function crt_multiply(p::PolynomialSparse{BigInt},q::PolynomialSparse{BigInt})
-    # println("p=$p")
-    # println("q=$q")
+    if iszero(p) || iszero(q)
+        return zero(p)
+    end
     height = 2*max(abs.(coeffs(p))...)*max(abs.(coeffs(q))...)*min(length(p),length(q))
 
-    # primes = [Primes.prevprime(typemax(Int))]
-    # M=big(primes[1])
-    # while M <= height
-    #     prime::Int64 = Primes.prevprime(primes[1]-1)
-    #     M *= prime
-    #     pushfirst!(primes,prime)
-    # end
-    prime::Int = Primes.prevprime(2^31)
+    #we need to find the largest prime that is guaranteed to not overflow when multiplying these polynomials
+    #i.e. we should have height(p*q)<2^63 : 2*p^2*min(length(p),length(q))<2^63 : p < sqrt(2^62/min(length(p),length(q))))
+
+    maxAllowedPrime = floor(Int64,sqrt(2^62/min(length(p),length(q))))
+
+    prime::Int = Primes.prevprime(maxAllowedPrime)
     M=big(prime)
     c = bigPoly((smallPoly(PolynomialModP(p,prime))*smallPoly(PolynomialModP(q,prime))).polynomial)
     while M <= height
@@ -47,3 +46,5 @@ function crt_multiply(p::PolynomialSparse{BigInt},q::PolynomialSparse{BigInt})
 
     return smod(c,M)
 end
+
+*(a::PolynomialSparse{BigInt},b::PolynomialSparse{BigInt}) = crt_multiply(a,b)

@@ -44,7 +44,7 @@ one(::Type{Term}) = Term(1,0) #default to Int
 """
 Show a term.
 """
-function show(io::IO, t::Term, cdot::Bool = false)
+function show(io::IO, t::Term; cdot::Bool = false)
     iszero(t.coeff) && return(print(io,"0"))
     iszero(t.degree) && return(print(io,t.coeff))
     print(io,abs(t.coeff) == 1 ? (t.coeff==1 ? "" : "-") : "$(t.coeff)$(cdot ? "⋅" : "")",(t.degree > 1 ? "x^$(t.degree)" : "x"))

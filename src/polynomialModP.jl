@@ -2,8 +2,12 @@ struct PolynomialModP
     polynomial::Polynomial
     p::Integer
 
-    function PolynomialModP(polynomial::Polynomial,p::Integer)
-        new(mod(polynomial,p),p)
+    function PolynomialModP(polynomial::Polynomial,p::Integer;reducing=true)
+        if reducing
+            return new(mod(polynomial,p),p)
+        else
+            return new(polynomial,p)
+        end
     end
 end
 
@@ -24,6 +28,11 @@ end
 function show(io::IO,p::PolynomialModP)
     show(io,p.polynomial)
     print(io," (mod $(p.p))")
+end
+
+#derivative
+function derivative(p::PolynomialModP)
+    return PolynomialModP(derivative(p.polynomial),p.p)
 end
 
 #arithmetic methods
@@ -93,14 +102,14 @@ function *(p1::PolynomialModP,p2::PolynomialModP)::PolynomialModP
 end
 
 #exponentiation
-function ^(p::PolynomialModP,n::Integer)::PolynomialModP
-    n < 0 && error("No negative power")
-    out = p
-    for _ in 1:n-1
-        out *=p
-    end
-    return out
-end
+# function ^(p::PolynomialModP,n::Integer)::PolynomialModP
+#     n < 0 && error("No negative power")
+#     out = p
+#     for _ in 1:n-1
+#         out *=p
+#     end
+#     return out
+# end
 
 
 #divide a polynomialModP by an integer:
@@ -129,15 +138,18 @@ function gcd(a::PolynomialModP, b::PolynomialModP)::PolynomialModP
     return PolynomialModP(gcd(a.polynomial,b.polynomial,a.p),a.p)
 end
 
-#factorise a polynomialModP:
-function factor(p::PolynomialModP)::Vector{Tuple{PolynomialModP,Integer}}
-    factors = factor(p.polynomial,p.p)
-    return map(f->(PolynomialModP(f[1],p.p),f[2]),factors)
-end
+# prim_part(a::PolynomialModP) = PolynomialModP(prim_part(a.polynomial)(a.p),a.p)
+prim_part(a::PolynomialModP) = a ÷ content(a.polynomial)
 
-function expand_factorization(factors::Vector{<:Tuple{PolynomialModP,Integer}})
-    return PolynomialModP(expand_factorization(map(f->(f[1].polynomial,f[2]),factors)),factors[1][1].p)
-end
+# #factorise a polynomialModP:
+# function factor(p::PolynomialModP)::Vector{Tuple{PolynomialModP,Integer}}
+#     factors = factor(p.polynomial,p.p)
+#     return map(f->(PolynomialModP(f[1],p.p),f[2]),factors)
+# end
+
+# function expand_factorization(factors::Vector{<:Tuple{PolynomialModP,Integer}})
+#     return PolynomialModP(expand_factorization(map(f->(f[1].polynomial,f[2]),factors)),factors[1][1].p)
+# end
 
 #boolean methods:
 ==(p1::PolynomialModP,p2::PolynomialModP) = p1.p == p2.p && p1.polynomial == p2.polynomial 
@@ -145,3 +157,15 @@ end
 iszero(p::PolynomialModP) = iszero(p.polynomial)
 
 ==(p::PolynomialModP, n::Integer) = iszero(p - n)
+
+#creation
+zero(p::PolynomialModP) = PolynomialModP(zero(p.polynomial),p.p)
+one(p::PolynomialModP) = PolynomialModP(one(p.polynomial),p.p)
+x_poly(p::PolynomialModP) = PolynomialModP(x_poly(typeof(p.polynomial)),p.p)
+x_poly_modp(polyType::Type{<:Polynomial},p::Int) = PolynomialModP(x_poly(polyType),p)
+copyTerms(p::PolynomialModP) = PolynomialModP(copyTerms(p.polynomial),p.p,reducing=false)
+rand_modp(polyType::Type{<:Polynomial},p::Int;kwargs...) = PolynomialModP(rand(polyType;kwargs...),p)
+
+#queries
+degree(p::PolynomialModP) = degree(p.polynomial)
+leading(p::PolynomialModP) = leading(p.polynomial)

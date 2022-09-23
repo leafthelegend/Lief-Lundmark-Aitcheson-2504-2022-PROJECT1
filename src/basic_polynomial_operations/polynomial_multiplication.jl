@@ -19,7 +19,7 @@ function *(p1::Polynomial, p2::Polynomial)::Polynomial
 end
 
 """
-Divide and conquer
+Divide and conquer (slower so not actually used)
 """
 function split(p::Polynomial)::Tuple{Polynomial,Polynomial}
     n = length(p)
@@ -32,7 +32,7 @@ function split(p::Polynomial)::Tuple{Polynomial,Polynomial}
     return (p1,p2)
 end
 
-function fast_multiply(p1::Polynomial, p2::Polynomial)::Polynomial
+function recursive_multiply(p1::Polynomial, p2::Polynomial)::Polynomial
     if iszero(p1) || iszero(p2)
         return typeof(p1)()
     end
@@ -46,18 +46,3 @@ function fast_multiply(p1::Polynomial, p2::Polynomial)::Polynomial
     p2_1, p2_2 = split(p2)
     return add!(add!(fast_multiply(p1_1,p2_1), fast_multiply(p1_1,p2_2)), add!(fast_multiply(p1_2,p2_1), fast_multiply(p1_2,p2_2)))
 end
-
-# *(p1::Polynomial, p2::Polynomial) = fast_multiply(p1,p2)
-
-"""
-Power of a polynomial.
-"""
-function ^(p::Polynomial, n::Int)
-    n < 0 && error("No negative power")
-    out = one(p)
-    for _ in 1:n
-        out *= p
-    end
-    return out
-end
-

@@ -23,7 +23,7 @@ function divide(num::Polynomial, den::Polynomial)
         while degree(f) ≥ degree(g) 
             h = typeof(num)( (leading(f) ÷ leading(g))(p) )  #syzergy 
             f = mod((f - h*g), p)
-            q = mod((q + h), p)  
+            q = mod((q + h), p)
             prev_degree == degree(f) && break
             prev_degree = degree(f)
         end

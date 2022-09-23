@@ -60,9 +60,9 @@ Add a sparse polynomial and a term (not in place).
 +(t::Term, p::Polynomial) = p + t
 
 """
-Add two polynomials (in place).
+Add two sparse polynomials (in place).
 """
-function add!(p1::Polynomial, p2::Polynomial)::Polynomial
+function add!(p1::PolynomialSparse, p2::PolynomialSparse)::PolynomialSparse
     t1, t2 = length(p1),length(p2) #initialise pointers to the terms of p1 and p2
     while t2 > 0
         if t1 == 0
@@ -82,6 +82,16 @@ function add!(p1::Polynomial, p2::Polynomial)::Polynomial
             t1 -= 1
             t2 -= 1
         end
+    end
+    return p1
+end
+
+"""
+Add two dense polynomials (in place)
+"""
+function add!(p1::PolynomialDense,p2::PolynomialDense)::PolynomialDense
+    for t in p2
+        p1+=t
     end
     return p1
 end
